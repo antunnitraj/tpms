@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://antunnitraj.github.io/tpms/">Website</a> ·
+  <a href="https://antunnitraj.from.hr/tpms/">Website</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#importing-from-lubelogger">Import from LubeLogger</a> ·
   <a href="https://github.com/antunnitraj/tpms/releases">Releases</a>
