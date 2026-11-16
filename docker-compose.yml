@@ -1,0 +1,92 @@
+# The Pocket Mechanic (TPMS, The Pocket Mechanic Server)
+#
+#   docker compose up -d     then open http://<this machine>:8080
+#
+# Another port? Put APP_PORT=80 in a .env file next to this one. Nothing else needs configuring:
+# the app key is generated on first start, and currency and timezone are chosen in Setup.
+# Behind an HTTPS reverse proxy, also set these in that .env (see README, "HTTPS"):
+#   TRUSTED_PROXIES=<the proxy's IP, or *>   SESSION_SECURE_COOKIE=true   APP_URL=https://cars.example.com
+name: tpms
+
+x-tpms: &tpms
+  build: .
+  image: tpms:latest
+  restart: unless-stopped
+  environment: &tpms-env
+    DB_HOST: db
+    QUEUE_CONNECTION: database
+    APP_URL: ${APP_URL:-http://localhost}
+    TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+    SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
+    # nginx must not believe client-sent IP headers; Laravel decides via TRUSTED_PROXIES.
+    TRUSTED_PROXY: "off"
+  volumes:
+    - storage:/var/www/html/storage
+  logging: &tpms-logging
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  app:
+    <<: *tpms
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      <<: *tpms-env
+      # Healthy only when Laravel itself answers (not just PHP-FPM).
+      HEALTHCHECK_PATH: /up
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Processes queued jobs (photo thumbnails now, notifications later).
+  queue:
+    <<: *tpms
+    command: ["php", "/var/www/html/artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
+    environment:
+      <<: *tpms-env
+      AUTORUN_ENABLED: "false"
+    stop_signal: SIGTERM
+    healthcheck:
+      test: ["CMD", "healthcheck-queue"]
+      start_period: 10s
+    depends_on:
+      app:
+        condition: service_healthy
+
+  scheduler:
+    <<: *tpms
+    command: ["php", "/var/www/html/artisan", "schedule:work"]
+    environment:
+      <<: *tpms-env
+      AUTORUN_ENABLED: "false"
+    stop_signal: SIGTERM
+    healthcheck:
+      test: ["CMD", "healthcheck-schedule"]
+      start_period: 10s
+    depends_on:
+      app:
+        condition: service_healthy
+
+  # Only reachable from the containers above (no port is published), so the simple password is fine.
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tpms
+      POSTGRES_USER: tpms
+      POSTGRES_PASSWORD: tpms
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    logging: *tpms-logging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tpms -d tpms"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  storage:
+  pgdata:

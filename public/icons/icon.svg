@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>The Pocket Mechanic</title>
+  <!-- A cog with a "!": maintenance that needs your attention. -->
+  <rect width="512" height="512" rx="112" fill="#262626"/>
+  <g fill="#fbbf24"><rect x="-27" y="-22" width="54" height="44" rx="10" transform="translate(256.0 88.0) rotate(0)"/><rect x="-27" y="-22" width="54" height="44" rx="10" transform="translate(374.8 137.2) rotate(45)"/><rect x="-27" y="-22" width="54" height="44" rx="10" transform="translate(424.0 256.0) rotate(90)"/><rect x="-27" y="-22" width="54" height="44" rx="10" transform="translate(374.8 374.8) rotate(135)"/><rect x="-27" y="-22" width="54" height="44" rx="10" transform="translate(256.0 424.0) rotate(180)"/><rect x="-27" y="-22" width="54" height="44" rx="10" transform="translate(137.2 374.8) rotate(225)"/><rect x="-27" y="-22" width="54" height="44" rx="10" transform="translate(88.0 256.0) rotate(270)"/><rect x="-27" y="-22" width="54" height="44" rx="10" transform="translate(137.2 137.2) rotate(315)"/></g>
+  <circle cx="256" cy="256" r="134" fill="none" stroke="#fbbf24" stroke-width="44"/>
+  <g fill="#fbbf24"><rect x="237" y="180" width="38" height="92" rx="19"/><circle cx="256" cy="322" r="21"/></g>
+</svg>

@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>The Pocket Mechanic</title>
+    <meta name="description" content="A self-hosted vehicle maintenance and fuel tracker, made for your phone. It imports your LubeLogger backup.">
+    <meta name="theme-color" content="#262626">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta property="og:title" content="The Pocket Mechanic">
+    <meta property="og:description" content="Self-hosted vehicle maintenance and fuel tracker, made for your phone.">
+    <meta property="og:image" content="https://antunnitraj.github.io/tpms/screenshots/desktop-overview.webp">
+    <meta property="og:url" content="https://antunnitraj.github.io/tpms/">
+    <style>
+        :root {
+            --bg: #fafaf9; --surface: #ffffff; --surface-2: #f5f5f4; --text: #1c1917; --muted: #57534e; --faint: #78716c;
+            --line: #e7e5e4; --accent: #fbbf24; --accent-strong: #f59e0b; --accent-ink: #1c1917; --accent-soft: #fef3c7;
+            --dark: #262626; --shadow: 0 1px 2px rgb(28 25 23 / .06), 0 12px 32px -12px rgb(28 25 23 / .18);
+            --radius: 20px; --gutter: 16px; --max: 1120px;
+            color-scheme: light;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0c0a09; --surface: #1c1917; --surface-2: #171412; --text: #fafaf9; --muted: #a8a29e; --faint: #8a8580;
+                --line: #2e2a27; --accent-soft: rgb(251 191 36 / .12);
+                --shadow: 0 1px 2px rgb(0 0 0 / .4), 0 16px 40px -16px rgb(0 0 0 / .7);
+                color-scheme: dark;
+            }
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+        body {
+            margin: 0; background: var(--bg); color: var(--text);
+            font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        img { max-width: 100%; height: auto; display: block; }
+        picture { display: block; }
+        a { color: inherit; }
+        .wrap { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 max(var(--gutter), env(safe-area-inset-left)); }
+
+        /* Header */
+        header.site { position: sticky; top: 0; z-index: 10; backdrop-filter: saturate(1.4) blur(12px); -webkit-backdrop-filter: saturate(1.4) blur(12px);
+            background: color-mix(in oklab, var(--bg) 82%, transparent); border-bottom: 1px solid var(--line); }
+        header.site .wrap { display: flex; align-items: center; gap: 12px; height: 64px; }
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; text-decoration: none; }
+        .brand img { width: 32px; height: 32px; }
+        nav.links { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+        nav.links a { text-decoration: none; color: var(--muted); font-size: 15px; padding: 8px 12px; border-radius: 10px; }
+        nav.links a:hover { color: var(--text); background: var(--surface-2); }
+        @media (max-width: 640px) { nav.links a.optional { display: none; } }
+
+        .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 14px;
+            font-weight: 600; text-decoration: none; border: 1px solid transparent; transition: transform .15s ease, background .15s ease; }
+        .button:active { transform: translateY(1px); }
+        .button.primary { background: var(--accent); color: var(--accent-ink); box-shadow: 0 6px 20px -8px rgb(245 158 11 / .7); }
+        .button.primary:hover { background: var(--accent-strong); }
+        .button.secondary { background: var(--surface); border-color: var(--line); color: var(--text); }
+        .button.secondary:hover { background: var(--surface-2); }
+        .button svg { width: 20px; height: 20px; }
+        nav.links .button { min-height: 40px; padding: 0 14px; border-radius: 12px; font-size: 15px; }
+
+        /* Hero */
+        .hero { position: relative; overflow: hidden; padding: 64px 0 72px; }
+        .hero::before { content: ""; position: absolute; inset: -20% -10% auto auto; width: 70%; height: 120%;
+            background: radial-gradient(closest-side, rgb(251 191 36 / .28), transparent 70%); pointer-events: none; }
+        .hero .wrap { position: relative; display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
+        .eyebrow { display: inline-flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; padding: 0; list-style: none; }
+        .eyebrow li { font-size: 13px; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
+        h1 { font-size: clamp(36px, 6vw, 60px); line-height: 1.04; letter-spacing: -.035em; margin: 0 0 20px; }
+        h1 mark { background: linear-gradient(transparent 62%, var(--accent) 62%, var(--accent) 92%, transparent 92%); color: inherit; padding: 0 .04em; }
+        .lead { font-size: clamp(17px, 2.2vw, 20px); color: var(--muted); margin: 0 0 32px; max-width: 34em; }
+        .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+        .hero-phones { position: relative; height: 560px; }
+        .phone { position: absolute; width: 250px; border-radius: 34px; padding: 8px; background: var(--dark); box-shadow: var(--shadow); }
+        .phone img { border-radius: 27px; width: 100%; height: auto; }
+        .hero-phones .phone:nth-child(1) { left: 2%; top: 56px; transform: rotate(-6deg); }
+        .hero-phones .phone:nth-child(2) { left: 50%; top: 0; transform: translateX(-50%); z-index: 2; width: 270px; }
+        .hero-phones .phone:nth-child(3) { right: 2%; top: 56px; transform: rotate(6deg); }
+        @media (max-width: 900px) {
+            .hero { padding: 40px 0 48px; }
+            .hero .wrap { grid-template-columns: 1fr; gap: 40px; }
+            .hero-phones { height: auto; display: flex; justify-content: center; }
+            .hero-phones .phone:nth-child(n) { position: relative; inset: auto; transform: none; width: min(64vw, 260px); }
+            .hero-phones .phone:not(:nth-child(2)) { display: none; }
+        }
+
+        /* Sections */
+        section.block { padding: 72px 0; border-top: 1px solid var(--line); }
+        .kicker { color: #b45309; font-weight: 700; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 10px; }
+        @media (prefers-color-scheme: dark) { .kicker { color: var(--accent); } }
+        h2 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; letter-spacing: -.025em; margin: 0 0 14px; }
+        .intro { color: var(--muted); font-size: 18px; max-width: 40em; margin: 0 0 40px; }
+
+        .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .feature { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+        .feature .icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--accent-soft); color: #b45309; margin-bottom: 14px; }
+        @media (prefers-color-scheme: dark) { .feature .icon { color: var(--accent); } }
+        .feature .icon svg { width: 22px; height: 22px; }
+        .feature h3 { font-size: 17px; margin: 0 0 6px; letter-spacing: -.01em; }
+        .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+        @media (max-width: 900px) { .features { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+
+        .gallery { display: grid; grid-auto-flow: column; grid-auto-columns: 230px; gap: 20px; overflow-x: auto; padding: 8px 4px 24px;
+            scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: thin; }
+        .gallery figure { margin: 0; scroll-snap-align: start; }
+        .gallery .phone { position: static; width: 100%; }
+        .gallery figcaption { margin-top: 12px; font-weight: 600; text-align: center; }
+        .gallery figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 14px; }
+        @media (min-width: 1100px) { .gallery { grid-auto-flow: row; grid-template-columns: repeat(6, 1fr); overflow: visible; padding: 8px 0 0; }
+            .gallery .phone { padding: 6px; border-radius: 26px; } .gallery .phone img { border-radius: 21px; } }
+
+        .split { display: grid; grid-template-columns: .9fr 1.1fr; gap: 48px; align-items: center; }
+        @media (max-width: 900px) { .split { grid-template-columns: 1fr; gap: 32px; } }
+        .checks { list-style: none; padding: 0; margin: 0 0 28px; display: grid; gap: 12px; }
+        .checks li { display: grid; grid-template-columns: 24px 1fr; gap: 10px; color: var(--muted); }
+        .checks li strong { color: var(--text); font-weight: 600; }
+        .checks svg { width: 22px; height: 22px; color: #16a34a; margin-top: 2px; }
+        .browser { border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); }
+        .browser .bar { display: flex; gap: 6px; padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+        .browser .bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
+        .desktop-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 760px) { .desktop-pair { grid-template-columns: 1fr; } }
+
+        .install { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+        @media (max-width: 900px) { .install { grid-template-columns: 1fr; } }
+        .code { position: relative; background: #1c1917; color: #f5f5f4; border-radius: 16px; padding: 52px 20px 20px 22px; font: 14.5px/1.75 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-x: auto; border: 1px solid #2e2a27; }
+        .code .prompt { color: #fbbf24; user-select: none; }
+        .code .comment { color: #a8a29e; }
+        .copy { position: absolute; top: 10px; right: 10px; font: 600 13px/1 system-ui, sans-serif; color: #f5f5f4; background: #292524; border: 1px solid #44403c; border-radius: 8px; padding: 8px 10px; cursor: pointer; }
+        .copy:hover { background: #3a3532; }
+        .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; }
+        .steps li { counter-increment: step; display: grid; grid-template-columns: 36px 1fr; gap: 14px; color: var(--muted); }
+        .steps li::before { content: counter(step); width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: var(--accent-ink); background: var(--accent); }
+        .steps strong { color: var(--text); display: block; }
+        .note { margin-top: 20px; padding: 14px 16px; border-radius: 14px; background: var(--accent-soft); color: var(--text); font-size: 15px; }
+        code.inline { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+
+        .disclaimer { font-size: 14px; color: var(--faint); border-left: 3px solid var(--line); padding-left: 12px; margin: 0; }
+        footer { border-top: 1px solid var(--line); padding: 32px 0 calc(32px + env(safe-area-inset-bottom)); color: var(--faint); font-size: 14px; }
+        footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: center; }
+        footer a { color: var(--muted); }
+        @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .button { transition: none; } }
+    </style>
+</head>
+<body>
+<header class="site">
+    <div class="wrap">
+        <a class="brand" href="#top"><img src="icon.svg" alt="">The Pocket Mechanic</a>
+        <nav class="links" aria-label="Main">
+            <a class="optional" href="#features">Features</a>
+            <a class="optional" href="#lubelogger">LubeLogger</a>
+            <a class="optional" href="#install">Install</a>
+            <a class="button secondary" href="https://github.com/antunnitraj/tpms">
+                <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                GitHub
+            </a>
+        </nav>
+    </div>
+</header>
+
+<main id="top">
+    <section class="hero">
+        <div class="wrap">
+            <div>
+                <ul class="eyebrow">
+                    <li>Self-hosted</li>
+                    <li>Open source · MIT</li>
+                    <li>Imports LubeLogger</li>
+                </ul>
+                <h1>Every service, fill-up and reminder, <mark>in your pocket</mark>.</h1>
+                <p class="lead">The Pocket Mechanic tracks maintenance, fuel economy, reminders and costs for every vehicle you own. It runs on your own server, installs on your phone like an app, and brings your LubeLogger history with it.</p>
+                <div class="actions">
+                    <a class="button primary" href="#install">Get started</a>
+                    <a class="button secondary" href="https://github.com/antunnitraj/tpms/releases/latest">Latest release</a>
+                </div>
+            </div>
+            <div class="hero-phones" aria-label="Screenshots on a phone">
+                <div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/fuel-dark.webp"><img src="screenshots/fuel.webp" width="860" height="1864" alt="Fuel log with fuel economy per fill-up" loading="lazy"></picture></div>
+                <div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/garage-dark.webp"><img src="screenshots/garage.webp" width="860" height="1864" alt="The garage, with a card for each vehicle"></picture></div>
+                <div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/overview-dark.webp"><img src="screenshots/overview.webp" width="860" height="1864" alt="A vehicle's overview with quick-add buttons" loading="lazy"></picture></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="block" id="features">
+        <div class="wrap">
+            <p class="kicker">Features</p>
+            <h2>Everything your car's history needs, nothing it doesn't.</h2>
+            <p class="intro">One log for services, repairs, upgrades and fees. Fuel economy that gets partial and missed fill-ups right. Reminders by date or by mileage, whichever comes first.</p>
+            <div class="features">
+                <article class="feature">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V10l9-6 9 6v11"/><path d="M7 21v-6h10v6M7 18h10"/></svg></div>
+                    <h3>Garage</h3>
+                    <p>A card per vehicle with its photo, odometer, fuel economy, cost per mile or km, and what's due next.</p>
+                </article>
+                <article class="feature">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 012-2h6a2 2 0 012 2v16M3 21h12M14 9h2a2 2 0 012 2v5a1.5 1.5 0 003 0V8l-3-3M7 8h4"/></svg></div>
+                    <h3>Fuel economy</h3>
+                    <p>L/100 km, km/L, US or UK MPG. Partial and missed fill-ups are handled; electric cars by state of charge.</p>
+                </article>
+                <article class="feature">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 003.4 0"/></svg></div>
+                    <h3>Reminders</h3>
+                    <p>By date, by mileage or both. Recurring ones move on when you mark them done, and can log the work in the same tap.</p>
+                </article>
+                <article class="feature">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.4 2.4-2.6-.4-.4-2.6z"/></svg></div>
+                    <h3>Log and plans</h3>
+                    <p>Services, repairs, upgrades, taxes and fees with attachments and tags. Plan work ahead; finishing a plan logs it.</p>
+                </article>
+                <article class="feature">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15v3M11 10v8M15 13v5M19 7v11"/></svg></div>
+                    <h3>Reports</h3>
+                    <p>Spending per month and category, distance, fuel economy and price trends, and a printable vehicle history.</p>
+                </article>
+                <article class="feature">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+                    <h3>Sharing</h3>
+                    <p>Share a vehicle with the people you live with. No public sign-up: administrators create accounts.</p>
+                </article>
+                <article class="feature">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg></div>
+                    <h3>Supplies and equipment</h3>
+                    <p>Oil, filters and parts with stock that follows use. Tyre sets and accessories with the distance on each.</p>
+                </article>
+                <article class="feature">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+                    <h3>Photos and documents</h3>
+                    <p>A gallery per vehicle with a cover photo, plus registration, insurance and receipts, kept private on your server.</p>
+                </article>
+                <article class="feature">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+                    <h3>Made for the phone</h3>
+                    <p>Big buttons, a tab bar under your thumb, and "Add to Home Screen" so it opens like an app.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="block" id="screens">
+        <div class="wrap">
+            <p class="kicker">On your phone</p>
+            <h2>Log a fill-up at the pump in seconds.</h2>
+            <p class="intro">Today's date and the last odometer reading are filled in for you. Swipe through the screens below; they show LubeLogger's demo data after importing it.</p>
+            <div class="gallery">
+                <figure><div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/garage-dark.webp"><img src="screenshots/garage.webp" width="860" height="1864" alt="Garage" loading="lazy"></picture></div><figcaption>Garage<span>Every vehicle at a glance</span></figcaption></figure>
+                <figure><div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/overview-dark.webp"><img src="screenshots/overview.webp" width="860" height="1864" alt="Vehicle overview" loading="lazy"></picture></div><figcaption>Overview<span>Quick add, stats, what's due</span></figcaption></figure>
+                <figure><div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/fuel-dark.webp"><img src="screenshots/fuel.webp" width="860" height="1864" alt="Fuel log" loading="lazy"></picture></div><figcaption>Fuel<span>Economy per fill-up</span></figcaption></figure>
+                <figure><div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/log-dark.webp"><img src="screenshots/log.webp" width="860" height="1864" alt="Maintenance log" loading="lazy"></picture></div><figcaption>Log<span>Services, repairs, fees</span></figcaption></figure>
+                <figure><div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/reports-dark.webp"><img src="screenshots/reports.webp" width="860" height="1864" alt="Reports" loading="lazy"></picture></div><figcaption>Reports<span>Where the money goes</span></figcaption></figure>
+                <figure><div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/supplies-dark.webp"><img src="screenshots/supplies.webp" width="860" height="1864" alt="Supplies" loading="lazy"></picture></div><figcaption>Supplies<span>Stock that follows use</span></figcaption></figure>
+            </div>
+        </div>
+    </section>
+
+    <section class="block" id="lubelogger">
+        <div class="wrap split">
+            <div>
+                <p class="kicker">Coming from LubeLogger?</p>
+                <h2>Bring every record with you.</h2>
+                <p class="intro">Upload a LubeLogger backup and see exactly what will be imported before anything is written.</p>
+                <ul class="checks">
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>A full preview</strong> of every vehicle, user and count, with dates and units you can correct.</span></li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>Cleaner data:</strong> LubeLogger's automatic odometer copies are left out, inspections join their service entry.</span></li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>Users keep their passwords</strong>, and households become sharing.</span></li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>One-click undo</strong> right after importing.</span></li>
+                </ul>
+                <p class="disclaimer">The Pocket Mechanic is a separate, independent project. It is not affiliated with, endorsed by or connected to LubeLogger or its owner; LubeLogger is named only to describe importing its backups.</p>
+            </div>
+            <div class="browser">
+                <div class="bar" aria-hidden="true"><i></i><i></i><i></i></div>
+                <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/desktop-import-dark.webp"><img src="screenshots/desktop-import.webp" width="1800" height="1125" alt="The import preview, showing the vehicle, its counts and the Import button" loading="lazy"></picture>
+            </div>
+        </div>
+    </section>
+
+    <section class="block" id="desktop">
+        <div class="wrap">
+            <p class="kicker">And on a big screen</p>
+            <h2>The same app, with room to breathe.</h2>
+            <p class="intro">Reports, reminders and the full history sit side by side on a laptop or tablet.</p>
+            <div class="desktop-pair">
+                <div class="browser"><div class="bar" aria-hidden="true"><i></i><i></i><i></i></div><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/desktop-overview-dark.webp"><img src="screenshots/desktop-overview.webp" width="1800" height="1125" alt="Vehicle overview on a desktop" loading="lazy"></picture></div>
+                <div class="browser"><div class="bar" aria-hidden="true"><i></i><i></i><i></i></div><picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/desktop-reports-dark.webp"><img src="screenshots/desktop-reports.webp" width="1800" height="1125" alt="Reports on a desktop" loading="lazy"></picture></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="block" id="install">
+        <div class="wrap install">
+            <div>
+                <p class="kicker">Install</p>
+                <h2>Running in a minute with Docker.</h2>
+                <p class="intro">You need Docker with Docker Compose. The app key is generated on first start; there is nothing else to configure.</p>
+                <ol class="steps">
+                    <li><span><strong>Start it</strong>Clone the repository and run Docker Compose.</span></li>
+                    <li><span><strong>Open it</strong>Go to <code class="inline">http://localhost:8080</code> and create the administrator account.</span></li>
+                    <li><span><strong>Import or start fresh</strong>Upload a LubeLogger backup, or add your first vehicle.</span></li>
+                </ol>
+            </div>
+            <div>
+                <div class="code" id="install-code"><button class="copy" type="button" data-copy="git clone https://github.com/antunnitraj/tpms.git
+cd tpms
+docker compose up -d">Copy</button><span class="prompt">$ </span>git clone https://github.com/antunnitraj/tpms.git
+<br><span class="prompt">$ </span>cd tpms
+<br><span class="prompt">$ </span>docker compose up -d
+<br><span class="comment"># then open http://localhost:8080</span></div>
+                <p class="note"><strong>Finish setup before exposing it to the internet:</strong> until the first account exists, whoever opens the page first becomes the administrator. HTTPS, backups and updating are covered in the <a href="https://github.com/antunnitraj/tpms#quick-start">README</a>.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="wrap">
+        <span>The Pocket Mechanic · MIT License · An independent project, not affiliated with LubeLogger or its owner. Screenshots show <a href="https://github.com/hargata/lubelog">LubeLogger</a>'s demo data.</span>
+        <span><a href="https://github.com/antunnitraj/tpms">GitHub</a> · <a href="https://github.com/antunnitraj/tpms/releases">Releases</a> · <a href="https://github.com/antunnitraj/tpms/issues">Issues</a></span>
+    </div>
+</footer>
+
+<script>
+    document.querySelectorAll('[data-copy]').forEach((button) => {
+        button.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(button.dataset.copy);
+                button.textContent = 'Copied';
+            } catch {
+                button.textContent = 'Select and copy';
+            }
+            setTimeout(() => button.textContent = 'Copy', 2000);
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#262626">
+    <title>The Pocket Mechanic — offline</title>
+    <style>
+        :root { color-scheme: light dark; --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --accent: #fbbf24; }
+        @media (prefers-color-scheme: dark) { :root { --bg: #1c1917; --fg: #f5f5f4; --muted: #a8a29e; --accent: #fbbf24; } }
+        body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--bg); color: var(--fg);
+               font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; padding: 24px; box-sizing: border-box; }
+        main { max-width: 22rem; text-align: center; }
+        img { width: 72px; height: 72px; border-radius: 18px; }
+        h1 { font-size: 1.25rem; margin: 1rem 0 .25rem; }
+        p { color: var(--muted); margin: 0 0 1.5rem; }
+        button { font: inherit; font-weight: 600; color: #17150f; background: var(--accent); border: 0; border-radius: 10px; padding: .75rem 1.25rem; width: 100%; }
+    </style>
+</head>
+<body>
+<main>
+    <img src="/icons/icon-192.png?v=ecda65c689" alt="">
+    <h1>You're offline</h1>
+    <p>The Pocket Mechanic needs a connection to load your vehicles. Check your network and try again.</p>
+    <button type="button" onclick="location.reload()">Try again</button>
+</main>
+</body>
+</html>

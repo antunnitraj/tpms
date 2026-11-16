@@ -1,0 +1,584 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../resources/views/**/*';
+@source '../../../../app/Support/**/*';
+
+/* ---- Installed app (PWA) and iOS --------------------------------------- */
+
+html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* Keep content clear of the Dynamic Island and the home indicator. */
+.fi-topbar {
+    padding-top: env(safe-area-inset-top);
+}
+
+.fi-main {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
+}
+
+.fi-sidebar {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Slide-overs and modals: buttons stay above the home indicator. */
+.fi-modal .fi-modal-footer {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+}
+
+/* Room for the bottom tab bar on phones and small tablets. */
+@media (max-width: 1023px) {
+    .fi-body:has(.tpms-tab-bar) .fi-main {
+        padding-bottom: calc(env(safe-area-inset-bottom) + 6rem);
+    }
+}
+
+/* A stat value with its unit (Format::stat): the unit smaller, both always on one line. */
+.tpms-stat {
+    white-space: nowrap;
+}
+
+.tpms-stat-unit {
+    margin-inline-start: 0.25em;
+    font-size: 0.55em;
+    font-weight: 500;
+    color: var(--gray-500);
+}
+
+.dark .tpms-stat-unit {
+    color: var(--gray-400);
+}
+
+/* Stats tiles: the value sizes itself to its tile (container units), so even
+   "88.88 L/100 km" or "€88,888.88" stays on one line in a narrow tile. */
+.fi-wi-stats-overview-stat {
+    container-type: inline-size;
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: clamp(1rem, 10.5cqi, 1.75rem);
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+/* ---- Phones ------------------------------------------------------------ */
+
+@media (max-width: 639px) {
+    /* iOS zooms into any input below 16px; keep forms steady. */
+    .fi-body input:not([type='checkbox']):not([type='radio']):not([type='range']),
+    .fi-body select,
+    .fi-body textarea,
+    .fi-body .fi-input,
+    .fi-body .fi-select-input {
+        font-size: 16px;
+    }
+
+    /* Page header: title on the left, compact actions on the right. */
+    .fi-header {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .fi-header > div:first-child:not(.fi-header-actions-ctn) {
+        min-width: 0;
+        flex: 1 1 0%;
+    }
+
+    .fi-header-actions-ctn {
+        align-self: flex-start;
+        gap: 0.5rem;
+    }
+
+    .fi-header-actions-ctn > .fi-ac {
+        flex: none;
+        gap: 0.5rem;
+    }
+
+    .fi-header-heading {
+        font-size: 1.5rem;
+        line-height: 2rem;
+    }
+
+    .fi-header-subheading {
+        margin-top: 0.25rem;
+        font-size: 0.9375rem;
+    }
+
+    /* Icon-only header buttons: a real tap target; the primary "add" is solid. */
+    .fi-header-actions-ctn .fi-icon-btn {
+        margin: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 0.875rem;
+    }
+
+    .fi-header-actions-ctn .fi-icon-btn.fi-color-primary {
+        /* Set per theme in the page head. */
+        background-color: var(--tpms-solid-bg);
+        color: var(--tpms-solid-fg);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+    }
+
+    .fi-header-actions-ctn .fi-icon-btn.fi-color-gray {
+        box-shadow: inset 0 0 0 1px rgb(168 162 158 / 0.35);
+    }
+
+    /* Sheet-style modal buttons: full width, thumb-sized. */
+    .fi-modal .fi-modal-footer-actions {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .fi-modal .fi-modal-footer-actions .fi-btn {
+        width: 100%;
+        min-height: 2.875rem;
+        font-size: 1rem;
+    }
+
+    /* Two stat tiles per row: keep long values inside the tile. */
+    .fi-wi-stats-overview-stat {
+        padding: 1rem;
+    }
+
+    /* One even 12px gap between tiles and blocks (the defaults mix 8, 24 and 32px). */
+    .fi-wi-stats-overview .fi-sc-has-gap {
+        gap: 0.75rem;
+    }
+
+    .tpms-overview .fi-page-content {
+        row-gap: 0.75rem;
+    }
+
+
+}
+
+/* Lists on phones and small tablets read like native lists: no bulk
+   checkboxes or sort bar, tap a row to open it, extra actions beside it. */
+@media (max-width: 767px) {
+    /* Lists marked tpms-selectable (photos & files) keep their checkboxes for bulk actions. */
+    .fi-ta:not(.tpms-selectable) .fi-ta-record-checkbox,
+    .fi-ta:not(.tpms-selectable) .fi-ta-content-header {
+        display: none;
+    }
+
+    .fi-ta-content-ctn .fi-ta-record {
+        padding-inline: 0;
+    }
+
+    .fi-ta-content-ctn .fi-ta-record .fi-ta-record-content-ctn {
+        flex-direction: row;
+        align-items: center;
+        min-width: 0;
+        flex: 1 1 0%;
+    }
+
+    .fi-ta-content-ctn .fi-ta-record .fi-ta-record-content-ctn > div:first-child {
+        min-width: 0;
+        flex: 1 1 0%;
+    }
+
+    .fi-ta-content-ctn .fi-ta-record .fi-ta-record-content {
+        padding-inline-start: 1rem;
+        padding-inline-end: 0.5rem;
+    }
+
+    .fi-ta-content-ctn .fi-ta-record .fi-ta-actions {
+        flex: none;
+        flex-wrap: nowrap;
+        gap: 0.25rem;
+        padding: 0 0.75rem 0 0;
+    }
+
+    .fi-ta-content-ctn .fi-ta-record .fi-ta-actions .fi-icon-btn {
+        width: 2.25rem;
+        height: 2.25rem;
+    }
+
+    /* The toolbar keeps search and filters, full width. */
+    .fi-ta-header-toolbar {
+        padding-inline: 0.75rem;
+    }
+
+    /* Only bulk actions live here, and bulk selection is off on phones (except selectable lists). */
+    .fi-ta:not(.tpms-selectable) .fi-ta-header-toolbar > .fi-ta-actions {
+        display: none;
+    }
+
+    .fi-ta-header-toolbar > div:last-child {
+        flex: 1 1 0%;
+        justify-content: flex-end;
+    }
+
+    .fi-ta-header-toolbar .fi-ta-search-field {
+        flex: 1 1 0%;
+        max-width: none;
+    }
+}
+
+/* Sign-in and setup on phones: full-screen, app-style. */
+@media (max-width: 639px) {
+    .fi-simple-main-ctn {
+        min-height: 100dvh;
+        align-items: stretch;
+        padding: calc(env(safe-area-inset-top) + 2.5rem) 1.25rem calc(env(safe-area-inset-bottom) + 1.5rem);
+    }
+
+    .fi-simple-main {
+        margin: 0;
+        width: 100%;
+        max-width: none;
+        background: transparent;
+        box-shadow: none;
+        --tw-ring-shadow: 0 0 #0000;
+        padding: 0;
+    }
+
+    .fi-simple-header .fi-logo > div {
+        flex-direction: column;
+        gap: 0.75rem;
+        font-size: 1.5rem;
+    }
+
+    .fi-simple-header .fi-logo img {
+        height: 4.5rem;
+        width: 4.5rem;
+        border-radius: 1.25rem;
+        box-shadow: 0 8px 24px rgb(251 191 36 / 0.3);
+    }
+
+    .fi-simple-header .fi-logo {
+        /* Filament sets an inline height for the top bar's logo size. */
+        height: auto !important;
+        margin-bottom: 1.5rem;
+    }
+
+    .fi-simple-page .fi-btn {
+        min-height: 3rem;
+        font-size: 1rem;
+    }
+}
+
+/* Larger tap targets on touch screens. */
+@media (pointer: coarse) {
+    .fi-input-wrp {
+        min-height: 2.75rem;
+    }
+
+    .fi-ta-record {
+        min-height: 3.5rem;
+    }
+
+    .fi-dropdown-list-item {
+        min-height: 2.75rem;
+    }
+}
+
+/* ---- Printed report ----------------------------------------------------
+   The Reports page carries a print-only report. Printing it (the Print
+   button, Ctrl/Cmd+P or Share → Print) shows only that report: black and
+   white, hairline rules, no backgrounds. */
+
+.tpms-print {
+    display: none;
+    color: #000;
+    font: 9pt/1.45 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-variant-numeric: tabular-nums;
+}
+
+@media print {
+    @page {
+        margin: 15mm 14mm 16mm;
+
+        @bottom-right {
+            content: counter(page) ' / ' counter(pages);
+            font: 7.5pt ui-sans-serif, system-ui, sans-serif;
+            color: #555;
+        }
+    }
+
+    html,
+    body.fi-body {
+        background: #fff !important;
+        color: #000 !important;
+        color-scheme: light;
+    }
+
+    body:has(> .tpms-print) > :not(.tpms-print) {
+        display: none !important;
+    }
+
+    .tpms-print {
+        display: block;
+    }
+}
+
+.tpms-print section {
+    margin-top: 20pt;
+}
+
+.tpms-print h1 {
+    margin: 0;
+    font-size: 24pt;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.tpms-print h2 {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 0 0 4pt;
+    padding-bottom: 4pt;
+    border-bottom: 1.5pt solid #000;
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    break-after: avoid;
+}
+
+.tpms-print h2 span {
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: #555;
+}
+
+.tpms-print-kicker {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14pt;
+    padding-bottom: 6pt;
+    border-bottom: 0.75pt solid #000;
+    font-size: 7pt;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #555;
+}
+
+.tpms-print-title {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16pt;
+}
+
+.tpms-print-title p {
+    margin: 4pt 0 0;
+    font-size: 10pt;
+    color: #444;
+}
+
+.tpms-print-plate {
+    flex: none;
+    padding: 3pt 9pt;
+    border: 1.5pt solid #000;
+    border-radius: 3pt;
+    font-size: 12pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+}
+
+.tpms-print-meta,
+.tpms-print-figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6pt 28pt;
+    margin: 12pt 0 0;
+}
+
+.tpms-print-figures {
+    margin-top: 8pt;
+}
+
+.tpms-print dt,
+.tpms-print-stats span {
+    display: block;
+    font-size: 6.5pt;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #555;
+}
+
+.tpms-print dd {
+    margin: 1pt 0 0;
+    font-size: 10pt;
+    font-weight: 600;
+}
+
+.tpms-print-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 16pt;
+    border-top: 1.5pt solid #000;
+    border-bottom: 0.75pt solid #000;
+    break-inside: avoid;
+}
+
+.tpms-print-stats > div {
+    padding: 8pt 10pt 9pt;
+    border-left: 0.5pt solid #bbb;
+}
+
+.tpms-print-stats > div:first-child {
+    padding-left: 0;
+    border-left: 0;
+}
+
+.tpms-print-stats strong {
+    display: block;
+    margin-top: 3pt;
+    font-size: 15pt;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.tpms-print-stats small {
+    display: block;
+    margin-top: 1pt;
+    font-size: 7.5pt;
+    color: #555;
+}
+
+.tpms-print table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tpms-print th,
+.tpms-print td {
+    padding: 4.5pt 6pt;
+    border-bottom: 0.5pt solid #ccc;
+    text-align: left;
+    vertical-align: top;
+}
+
+.tpms-print th:first-child,
+.tpms-print td:first-child {
+    padding-left: 0;
+}
+
+.tpms-print th:last-child,
+.tpms-print td:last-child {
+    padding-right: 0;
+}
+
+.tpms-print thead th {
+    padding-top: 6pt;
+    border-bottom: 0.75pt solid #000;
+    font-size: 6.5pt;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #555;
+}
+
+.tpms-print tfoot {
+    display: table-row-group;
+}
+
+.tpms-print tfoot th,
+.tpms-print tfoot td {
+    border-top: 1.5pt solid #000;
+    border-bottom: 0;
+    font-weight: 700;
+}
+
+.tpms-print tr {
+    break-inside: avoid;
+}
+
+.tpms-print .num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.tpms-print .nowrap {
+    white-space: nowrap;
+}
+
+.tpms-print-share-col {
+    width: 30%;
+    white-space: nowrap;
+}
+
+/* Share bars are drawn with borders, which print without "background graphics". */
+.tpms-print-share {
+    display: inline-block;
+    width: 60%;
+    margin-right: 6pt;
+    border-top: 3pt solid #e2e2e2;
+    vertical-align: middle;
+}
+
+.tpms-print-share > span {
+    display: block;
+    margin-top: -3pt;
+    border-top: 3pt solid #000;
+}
+
+.tpms-print-history .tpms-print-year th,
+.tpms-print-history .tpms-print-year td {
+    padding-top: 12pt;
+    border-bottom: 0.75pt solid #000;
+    font-size: 10pt;
+    font-weight: 700;
+}
+
+.tpms-print-tag {
+    display: inline-block;
+    padding: 0.5pt 5pt;
+    border: 0.75pt solid #000;
+    border-radius: 99pt;
+    font-size: 6pt;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tpms-print-description {
+    font-weight: 500;
+}
+
+.tpms-print-note {
+    margin-top: 1.5pt;
+    font-size: 8pt;
+    color: #555;
+    white-space: pre-line;
+}
+
+.tpms-print-empty {
+    color: #555;
+}
+
+.tpms-print-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 12pt;
+    margin-top: 24pt;
+    padding-top: 6pt;
+    border-top: 0.5pt solid #bbb;
+    font-size: 7pt;
+    color: #555;
+}
+
+/* A photo picked up for dragging (after the press-and-hold) lifts off the grid. */
+.tpms-photo-chosen {
+    transform: scale(1.06);
+    box-shadow: 0 12px 28px -6px rgb(0 0 0 / .45);
+    z-index: 1;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
