@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/filament/app/theme.css'],
+            input: ['resources/css/filament/app/theme.css', 'resources/js/photo-editor.js'],
             refresh: true,
         }),
         tailwindcss(),

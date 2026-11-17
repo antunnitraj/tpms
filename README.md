@@ -34,7 +34,7 @@
 - **Fuel:** fuel economy that handles partial and missed fill-ups, in L/100 km, km/L, US or UK MPG; electric cars by state of charge.
 - **Odometer:** one timeline built from every entry with a mileage, plus your own readings.
 - **Reminders** by date, by mileage or both. Recurring ones move on when you mark them done, and can log the work in the same step.
-- **Plans** (planned, doing, done: finishing one logs it), **supplies** with stock, **equipment** such as tyre sets with distance per set, **notes**, and **photos & documents**.
+- **Plans** (planned, doing, done: finishing one logs it), **supplies** with stock, **equipment** such as tyre sets with distance per set, **notes**, and **photos & documents** (crop, turn and mirror photos right in the gallery).
 - **Reports:** spending per month and per category, distance, fuel economy and price trends, and a printable history.
 - **Sharing:** share a vehicle with other people on your server. Everyone it's shared with has full access.
 - **Accounts:** no public sign-up; administrators create users.
@@ -122,7 +122,7 @@ docker compose up -d
 ```
 
 `--pull` fetches security fixes for PHP and nginx. To stay on a release instead of the latest code, check out its tag,
-for example `git checkout v0.1.1`.
+for example `git checkout v0.2.0`.
 
 ### Backups
 
