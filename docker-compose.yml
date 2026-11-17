@@ -5,7 +5,8 @@
 # Another port? Put APP_PORT=80 in a .env file next to this one. Nothing else needs configuring:
 # the app key is generated on first start, and currency and timezone are chosen in Setup.
 # Behind an HTTPS reverse proxy, also set these in that .env (see README, "HTTPS"):
-#   TRUSTED_PROXIES=<the proxy's IP, or *>   SESSION_SECURE_COOKIE=true   APP_URL=https://cars.example.com
+#   APP_URL=https://cars.example.com   SESSION_SECURE_COOKIE=true   TRUSTED_PROXIES=<the proxy's IP, or *>
+# APP_PORT=127.0.0.1:8080 publishes the port only to this machine (e.g. for a Cloudflare Tunnel).
 name: tpms
 
 x-tpms: &tpms

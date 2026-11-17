@@ -105,6 +105,21 @@ it('ignores X-Forwarded-For unless a proxy is configured', function () {
     $this->get('/_test/ip', ['X-Forwarded-For' => '203.0.113.9'])->assertSee('203.0.113.9');
 });
 
+it('links to https on the APP_URL host even when the proxy is not trusted', function () {
+    config(['app.url' => 'https://cars.example.test']);
+
+    // A tunnel forwards plain HTTP with the public host name.
+    $this->get('http://cars.example.test/login')
+        ->assertOk()
+        ->assertSee('https://cars.example.test/', false)
+        ->assertDontSee('http://cars.example.test', false);
+
+    // Opened by its LAN address, it stays on plain HTTP.
+    $this->get('http://192.168.1.5/login')
+        ->assertOk()
+        ->assertSee('http://192.168.1.5/', false);
+});
+
 it('treats usernames and emails case-insensitively', function () {
     $admin = User::factory()->admin()->create(['username' => 'boss']);
     User::factory()->create(['username' => 'ana', 'email' => 'ana@example.test']);

@@ -82,21 +82,28 @@ Data lives in two volumes: `pgdata` (the database) and `storage` (photos, docume
 ### HTTPS and "Add to Home Screen"
 
 Phones only install web apps served over HTTPS. Put The Pocket Mechanic behind your reverse proxy (Caddy, Traefik,
-nginx, Cloudflare Tunnel, …) pointing at its port, and tell it about the proxy in the same `.env` file:
+nginx, Cloudflare Tunnel, …) pointing at its port, and give it its address in the same `.env` file:
 
 ```bash
-TRUSTED_PROXIES=192.168.1.10        # the proxy's IP as the app sees it (or * if only the proxy can reach the port)
-SESSION_SECURE_COOKIE=true          # sign-in cookies only over HTTPS
 APP_URL=https://cars.example.com
+SESSION_SECURE_COOKIE=true          # sign-in cookies only over HTTPS
+TRUSTED_PROXIES=192.168.1.10        # recommended: the proxy's IP as the app sees it (or * if only the proxy can reach the port)
 ```
 
-Then run `docker compose up -d` again. Without `TRUSTED_PROXIES` the app ignores `X-Forwarded-*` headers, so nobody can
-fake their address to get around the sign-in limit, but pages behind the proxy would link to `http://`.
+Then run `docker compose up -d` again. Pages opened at the `APP_URL` address link to `https://` even when the proxy
+talks plain HTTP to the app. Opened by another address, such as `http://192.168.1.5`, they stay on that address.
+
+`TRUSTED_PROXIES` lets the app believe the proxy's `X-Forwarded-For` header, so it sees each visitor's own IP address.
+Without it the app ignores that header, so nobody can fake their address, but everyone coming through the proxy shares
+the proxy's address, and with it the sign-in limit of 5 tries a minute. For a Cloudflare Tunnel on the same machine,
+publish the port only locally (`APP_PORT=127.0.0.1:8080`, then point the tunnel at `http://localhost:8080`) and set
+`TRUSTED_PROXIES=*`.
 
 The proxy must:
 
-- send `X-Forwarded-For` and `X-Forwarded-Proto` (Caddy and Traefik do; with nginx add
-  `proxy_set_header X-Forwarded-Proto $scheme;` and `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`);
+- send the original `Host` header, and `X-Forwarded-For` and `X-Forwarded-Proto` (Caddy, Traefik and Cloudflare Tunnel
+  do; with nginx add `proxy_set_header Host $host;`, `proxy_set_header X-Forwarded-Proto $scheme;` and
+  `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`);
 - accept large uploads: documents up to 100 MB and LubeLogger backups up to 2 GB
   (nginx: `client_max_body_size 2g;`; Cloudflare's free plan stops at 100 MB);
 - allow long requests for big imports (nginx: `proxy_read_timeout 600s;`).
@@ -115,7 +122,7 @@ docker compose up -d
 ```
 
 `--pull` fetches security fixes for PHP and nginx. To stay on a release instead of the latest code, check out its tag,
-for example `git checkout v0.1.0`.
+for example `git checkout v0.1.1`.
 
 ### Backups
 

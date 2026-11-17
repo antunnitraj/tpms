@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureSetupComplete;
+use App\Http\Middleware\UseAppUrlScheme;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Proxies are only trusted when configured (TRUSTED_PROXIES, see config/trustedproxy.php):
         // otherwise anyone could pick their own IP address with an X-Forwarded-For header.
+        // An https APP_URL is enough for https links, though.
+        $middleware->prepend(UseAppUrlScheme::class);
         $middleware->redirectGuestsTo(fn () => route('filament.app.auth.login'));
         // The first-run wizard must win over "please log in".
         $middleware->prependToPriorityList(
