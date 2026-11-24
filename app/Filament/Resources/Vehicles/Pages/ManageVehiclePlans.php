@@ -103,6 +103,8 @@ class ManageVehiclePlans extends VehicleEntriesPage
             ->defaultSort(fn (Builder $query) => $query
                 ->orderByRaw("case priority when 'critical' then 0 when 'normal' then 1 else 2 end")
                 ->orderByDesc('updated_at'))
+            // A vehicle's plans fit on one page; paging them only hid some.
+            ->paginated(false)
             ->recordAction('edit')
             ->recordActions([
                 Action::make('start')

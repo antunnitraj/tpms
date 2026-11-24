@@ -59,16 +59,61 @@ class Fields
             ->default($current);
     }
 
-    public static function money(string $name, ?string $label = null): TextInput
+    public static function money(string $name, ?string $label = null, ?int $till = null): TextInput
     {
-        return TextInput::make($name)
+        return static::decimal(TextInput::make($name)
             ->label($label ?? __('Cost'))
-            ->numeric()
-            ->inputMode('decimal')
             ->minValue(-self::MAX_MONEY)
             ->maxValue(self::MAX_MONEY)
-            ->step('0.01')
-            ->prefix(Format::currencySymbol());
+            ->prefix(Format::currencySymbol()), $till);
+    }
+
+    /**
+     * A decimal number typed on a phone. It is a text field with the decimal keypad, because a number
+     * field refuses the comma that many keyboards offer instead of a dot; a comma counts as the decimal
+     * point. With $till, digits fill in from the right like a till: 1234 becomes 12.34 ($till = 2).
+     * (Not ->numeric(): Filament would turn "12,34" into 12.) The typing side is x-tpms-decimal, in pwa/head.
+     */
+    public static function decimal(TextInput $input, ?int $till = null): TextInput
+    {
+        $input->rule('numeric')
+            ->inputMode('decimal')
+            ->extraAlpineAttributes(['x-tpms-decimal' => (string) $till])
+            ->mutateStateForValidationUsing(fn (mixed $state) => static::normalizeDecimal($state))
+            ->mutateDehydratedStateUsing(fn (mixed $state) => static::normalizeDecimal($state));
+
+        if ($till !== null) {
+            $input->placeholder(number_format(0, $till))
+                ->formatStateUsing(fn (mixed $state) => static::withDecimals($state, $till));
+        }
+
+        return $input;
+    }
+
+    /** "12,5" → "12.5", and nothing typed → null. */
+    public static function normalizeDecimal(mixed $state): mixed
+    {
+        if (! is_string($state)) {
+            return $state;
+        }
+
+        $state = str_replace(',', '.', trim($state));
+
+        return $state === '' ? null : $state;
+    }
+
+    /** A number with as many decimals as a till field types ("40.000" → "40.00"), unless that would drop digits. */
+    public static function withDecimals(mixed $value, int $places): mixed
+    {
+        $value = static::normalizeDecimal(is_int($value) || is_float($value) ? (string) $value : $value);
+
+        if (! is_numeric($value)) {
+            return $value;
+        }
+
+        $fixed = number_format((float) $value, $places, '.', '');
+
+        return abs((float) $fixed - (float) $value) < 1e-9 ? $fixed : (string) $value;
     }
 
     public static function notes(string $name = 'notes'): Textarea
@@ -146,11 +191,11 @@ class Fields
             ->relationship()
             ->schema([
                 Select::make('supply_id')->label(__('Supply'))->options($options)->required()->searchable()->live(),
-                TextInput::make('quantity')->label(__('Quantity'))->numeric()->inputMode('decimal')->required()
+                static::decimal(TextInput::make('quantity')->label(__('Quantity'))->required()
                     ->minValue(0.001)
                     ->maxValue(fn (Get $get, ?SupplyMovement $record) => ($supply = $vehicle->supplies()->find($get('supply_id')))
                         ? round($supply->stock() + abs((float) ($record?->quantity ?? 0)), 3)
-                        : null),
+                        : null)),
             ])
             ->columns(['sm' => 2])
             ->defaultItems(0)

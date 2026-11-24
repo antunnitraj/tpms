@@ -19,24 +19,26 @@ class FuelRecordForm
         $electric = $unit === FuelUnit::KilowattHours;
 
         // Enter either the total or the unit price; the other one follows.
-        $fromUnitPrice = fn (Get $get, Set $set) => filled($get('unit_price')) && (float) $get('quantity') > 0
-            ? $set('cost', round((float) $get('unit_price') * (float) $get('quantity'), 2)) : null;
-        $fromTotal = fn (Get $get, Set $set) => (float) $get('quantity') > 0 && filled($get('cost'))
-            ? $set('unit_price', round((float) $get('cost') / (float) $get('quantity'), 3)) : null;
+        $number = fn (mixed $state) => is_numeric($state = Fields::normalizeDecimal($state)) ? (float) $state : null;
+        $fromUnitPrice = fn (Get $get, Set $set) => $number($get('unit_price')) !== null && $number($get('quantity')) > 0
+            ? $set('cost', number_format($number($get('unit_price')) * $number($get('quantity')), 2, '.', '')) : null;
+        $fromTotal = fn (Get $get, Set $set) => $number($get('cost')) !== null && $number($get('quantity')) > 0
+            ? $set('unit_price', number_format($number($get('cost')) / $number($get('quantity')), 3, '.', '')) : null;
 
+        // Typed from a receipt or the pump, like a till: 1234 is 12.34 (litres, money) and 1459 is 1.459 (price).
         return [
             Grid::make(['default' => 2])->schema([
                 Fields::date(),
                 Fields::mileage($vehicle),
             ]),
             Grid::make(['default' => 2, 'sm' => 3])->schema([
-                TextInput::make('quantity')->label($electric ? __('Energy') : __('Amount'))
-                    ->numeric()->inputMode('decimal')->required()->minValue(0.001)->suffix($unit->short())
-                    ->live(onBlur: true)->afterStateUpdated(fn (Get $get, Set $set) => filled($get('unit_price')) ? $fromUnitPrice($get, $set) : $fromTotal($get, $set)),
-                Fields::money('unit_price', __('Price per :unit', ['unit' => $unit->short()]))
-                    ->step('0.001')->dehydrated(false)->live(onBlur: true)->afterStateUpdated($fromUnitPrice)
-                    ->afterStateHydrated(fn (Get $get, Set $set) => $fromTotal($get, $set)),
-                Fields::money('cost', __('Total'))->required()->live(onBlur: true)->afterStateUpdated($fromTotal)
+                Fields::decimal(TextInput::make('quantity')->label($electric ? __('Energy') : __('Amount'))
+                    ->required()->minValue(0.001)->suffix($unit->short()), till: 2)
+                    ->live(onBlur: true)->afterStateUpdated(fn (Get $get, Set $set) => filled($get('cost')) ? $fromTotal($get, $set) : $fromUnitPrice($get, $set)),
+                Fields::money('cost', __('Total'), till: 2)->required()->live(onBlur: true)->afterStateUpdated($fromTotal),
+                Fields::money('unit_price', __('Price per :unit', ['unit' => $unit->short()]), till: 3)
+                    ->dehydrated(false)->live(onBlur: true)->afterStateUpdated($fromUnitPrice)
+                    ->afterStateHydrated(fn (Get $get, Set $set) => $fromTotal($get, $set))
                     ->columnSpan(['default' => 2, 'sm' => 1]),
             ]),
             ...($electric ? [

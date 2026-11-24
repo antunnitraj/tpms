@@ -39,4 +39,39 @@
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => navigator.serviceWorker.register('{{ asset('sw.js') }}', { scope: '/' }).catch(() => {}));
     }
+
+    // Decimal fields (Fields::decimal): many phone keyboards only offer a comma, so it becomes the
+    // decimal point. x-tpms-decimal="2" types like a till instead: digits fill in from the right
+    // and a comma or dot is ignored, so 1234 becomes 12.34.
+    document.addEventListener('alpine:init', () => {
+        window.Alpine.directive('tpms-decimal', (el, { expression }, { cleanup }) => {
+            const places = expression === '' ? null : Number(expression);
+
+            const tidy = () => {
+                const typed = el.value;
+                let value = typed.replace(/,/g, '.');
+
+                if (places !== null) {
+                    const digits = typed.replace(/\D/g, '').replace(/^0+/, '');
+                    const padded = digits.padStart(places + 1, '0');
+                    value = digits === '' ? '' : `${padded.slice(0, -places)}.${padded.slice(-places)}`;
+                }
+
+                if (value === typed) {
+                    return;
+                }
+
+                const caret = el.selectionStart;
+                el.value = value;
+                if (places === null) {
+                    el.setSelectionRange(caret, caret);
+                }
+                // Tell wire:model, which may have read the untidy value already.
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            };
+
+            el.addEventListener('input', tidy);
+            cleanup(() => el.removeEventListener('input', tidy));
+        });
+    });
 </script>

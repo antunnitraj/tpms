@@ -27,7 +27,7 @@ class SupplyActions
             ->schema([
                 Fields::date(),
                 Grid::make(['default' => 2])->schema([
-                    TextInput::make('quantity')->label(__('Quantity'))->numeric()->inputMode('decimal')->required()->minValue(0.001),
+                    Fields::decimal(TextInput::make('quantity')->label(__('Quantity'))->required()->minValue(0.001)),
                     Fields::money('cost', __('Total paid'))->required()->default(0),
                 ]),
             ])
@@ -46,7 +46,7 @@ class SupplyActions
             ->modalDescription(__('Use a negative amount for spilled, lost or used-up stock.'))
             ->schema([
                 Grid::make(['default' => 2])->schema([
-                    TextInput::make('quantity')->label(__('Change in quantity'))->numeric()->inputMode('decimal')->required(),
+                    Fields::decimal(TextInput::make('quantity')->label(__('Change in quantity'))->required()),
                     Fields::money('cost', __('Change in value'))->default(0),
                 ]),
                 TextInput::make('note')->label(__('Reason'))->maxLength(255),

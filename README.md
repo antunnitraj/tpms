@@ -122,7 +122,7 @@ docker compose up -d
 ```
 
 `--pull` fetches security fixes for PHP and nginx. To stay on a release instead of the latest code, check out its tag,
-for example `git checkout v0.2.0`.
+for example `git checkout v0.3.0`.
 
 ### Backups
 

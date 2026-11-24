@@ -19,7 +19,7 @@ class SupplyForm
             ]),
             ...($creating ? [
                 Section::make(__('In stock'))->compact()->columns(['default' => 2])->schema([
-                    TextInput::make('initial_quantity')->label(__('Quantity'))->numeric()->inputMode('decimal')->minValue(0)->default(1),
+                    Fields::decimal(TextInput::make('initial_quantity')->label(__('Quantity'))->minValue(0)->default(1)),
                     Fields::money('initial_cost', __('Total paid'))->default(0),
                 ]),
             ] : []),
